@@ -3,7 +3,8 @@ import numpy as np
 import pickle
 
 app = Flask(__name__)
-model = pickle.load(open('model.pkl', 'rb'))
+model = pickle.load(open('sustainability_model.pkl', 'rb'))
+
 
 @app.route('/')
 def home():
