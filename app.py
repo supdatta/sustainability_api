@@ -1,22 +1,17 @@
 from flask import Flask, request, jsonify
-import cv2
 import numpy as np
-import joblib
-import os
+import pickle
 
 app = Flask(__name__)
-model = joblib.load("sustainability_model.pkl")
+model = pickle.load(open('model.pkl', 'rb'))
+
+@app.route('/')
+def home():
+    return "API is live"
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if 'image' not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
+    data = request.json['features']  # example: {"features": [1, 2, 3, 4]}
+    prediction = model.predict([data])
+    return jsonify({'prediction': prediction.tolist()})
 
-    file = request.files['image']
-    npimg = np.frombuffer(file.read(), np.uint8)
-    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-    img = cv2.resize(img, (64, 64)).flatten().reshape(1, -1)
-
-    pred = model.predict(img)[0]
-    label = "Sustainable" if pred == 0 else "Non-Sustainable"
-    return jsonify({"prediction": label})
